@@ -108,6 +108,59 @@ conn.close()
 server_socket.close()
 
 ```
+### UPD
+
+## server.py
+~~~
+import socket
+
+# Create a UDP socket object (SOCK_DGRAM instead of SOCK_STREAM)
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Bind the socket to the host and port
+server_socket.bind(('localhost', 8000))
+print("UDP server is listening for incoming datagrams on port 8000...")
+
+# In UDP, the server receives the client's initial message first 
+# to discover the client's address (IP and ephemeral port)
+data, client_addr = server_socket.recvfrom(1024)
+print(f"Received from client at {client_addr}: {data.decode()}")
+
+# Send a response back to the client using its address
+server_socket.sendto("Hello from the UDP server!".encode(), client_addr)
+
+# Close the socket
+server_socket.close()
+~~~
+
+## client.py
+
+~~~
+import socket
+
+# Create a UDP socket object (SOCK_DGRAM instead of SOCK_STREAM)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+server_address = ('localhost', 8000)
+
+# Send an initial message to the server
+# (This binds the socket locally and lets the server discover the client's port)
+message = "Hello from the client!"
+client_socket.sendto(message.encode(), server_address)
+
+# Print the dynamically assigned client socket address
+print(f"Client sending from: {client_socket.getsockname()}")
+
+# Receive the response from the server
+server_data, server_addr = client_socket.recvfrom(1024)
+print(f"Received from server at {server_addr}: {server_data.decode()}")
+
+# Send acknowledgment back to the server
+client_socket.sendto("Acknowledgement received from the client.".encode(), server_address)
+
+# Close the socket
+client_socket.close()
+~~~
 
 ## OUTPUT:
 
